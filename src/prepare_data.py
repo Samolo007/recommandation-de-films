@@ -37,3 +37,13 @@ print("utilisateurs :", ratings["user_id"].nunique(), "| films notés :", rating
 print("--- u.item ---")
 print(items.isna().sum())
 print("titres en double :", items["title"].duplicated().sum())
+data = ratings.merge(items, on="item_id", how="left")
+print("après jointure :", data.shape, "| titres manquants :", data["title"].isna().sum())
+
+liked = data[data["rating"] >= 4]
+print("interactions aimées :", liked.shape[0])
+
+liked_per_user = liked.groupby("user_id").size()
+print("utilisateurs avec au moins un film aimé :", liked_per_user.shape[0])
+print(liked_per_user.describe())
+print("utilisateurs avec moins de 2 films aimés :", (liked_per_user < 2).sum())
