@@ -1,4 +1,6 @@
 import pandas as pd
+from pathlib import Path
+import matplotlib.pyplot as plt
 
 ratings = pd.read_csv(
     "data/ml-100k/u.data",
@@ -47,3 +49,15 @@ liked_per_user = liked.groupby("user_id").size()
 print("utilisateurs avec au moins un film aimé :", liked_per_user.shape[0])
 print(liked_per_user.describe())
 print("utilisateurs avec moins de 2 films aimés :", (liked_per_user < 2).sum())
+counts = ratings["rating"].value_counts().sort_index()
+colors = ["#b0b0b0" if note < 4 else "#2a7ab0" for note in counts.index]
+
+fig, ax = plt.subplots(figsize=(7, 4))
+ax.bar(counts.index, counts.values, color=colors)
+ax.set_xlabel("Note")
+ax.set_ylabel("Nombre de notes")
+ax.set_title("Répartition des notes (en bleu : notes ≥ 4, conservées)")
+
+Path("figures").mkdir(exist_ok=True)
+fig.savefig("figures/repartition_notes.png", dpi=150, bbox_inches="tight")
+plt.show()
