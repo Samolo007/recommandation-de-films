@@ -25,3 +25,24 @@ tous les films notés présents dans le catalogue. Aucun nettoyage n'a été né
 
 **Profils éligibles :** utilisateur ayant au moins 2 films aimés (note ≥ 4),
 soit 942 profils sur 943.
+
+
+### Lancer l'API
+
+Toutes les commandes se lancent depuis recommandation-de-films.
+
+Prérequis : les données dans `data/ml-100k/` (voir la section Données) et les dépendances installées :
+```
+ pip install -r requirements.txt
+```
+
+1. Générer l'index des voisins (une seule fois) :
+   ```
+   python src/train_model.py
+   ```
+   Cette commande crée `models/knn_index.joblib`. Sans ce fichier, l'API refuse de démarrer.
+2. Lancer l'API :
+   ```
+   uvicorn api:app --reload
+   ```
+3. Tester l'API dans le navigateur : `http://127.0.0.1:8000/docs`
