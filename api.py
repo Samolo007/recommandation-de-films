@@ -29,3 +29,28 @@ class RecommendationResponse(BaseModel):
     recommendations: list[Recommendation]    
     message: str | None = None
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    if not MODEL.is_file():
+        raise RuntimeError(
+            "Index introuvable. Lancez d'abord : python src/train_model.py"
+        )
+    app.state.index = joblib.load(MODEL)
+    yield
+
+
+app = FastAPI(title="Recommandation de films", lifespan=lifespan)
+
+
+@app.exception_handler(RequestValidationError)
+async def invalid_input(request: Request, error: RequestValidationError):
+    details = [
+        {"loc": item["loc"], "msg": item["msg"], "type": item["type"]}
+        for item in error.errors()
+    ]
+    return JSONResponse(status_code=422, content={"detail": details})
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
