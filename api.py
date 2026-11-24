@@ -27,4 +27,5 @@ class RecommendationResponse(BaseModel):
     item_id: int
     title: str
     recommendations: list[Recommendation]    
-    message: str | None = None              
+    message: str | None = None
+
