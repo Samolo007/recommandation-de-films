@@ -81,6 +81,7 @@ licence MovieLens) : `{"neighbors": ..., "catalog": ...}`. Python 3.14.
     python src/train_model.py
 
 
+## API
 ### Lancer l'API
 
 Toutes les commandes se lancent depuis recommandation-de-films.
@@ -153,7 +154,7 @@ Film sans voisins (200) :
 }
 ```
 
-200 parce que l'entrée est juste et le film existe dans le catalogue mais c'est juste que le film entrée ne possède pas de voisin : : aucun spectateur n'a donné 4 ou 5 à ce film
+200 parce que l'entrée est juste et le film existe dans le catalogue mais c'est juste que le film entrée ne possède pas de voisin : aucun spectateur n'a donné 4 ou 5 à ce film
 
 #### Erreurs
 
