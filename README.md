@@ -88,7 +88,7 @@ Toutes les commandes se lancent depuis recommandation-de-films.
 
 Prérequis : les données dans `data/ml-100k/` (voir la section Données) et les dépendances installées :
 ```
- pip install -r requirements.txt
+ python -m pip install -r requirements.txt
 ```
 
 1. Générer l'index des voisins (une seule fois) :
@@ -98,10 +98,15 @@ Prérequis : les données dans `data/ml-100k/` (voir la section Données) et les
    Cette commande crée `models/knn_index.joblib`. Sans ce fichier, l'API refuse de démarrer.
 2. Lancer l'API :
    ```
-   uvicorn api:app --reload
+   python -m uvicorn api:app --reload
    ```
 3. Tester l'API dans le navigateur : `http://127.0.0.1:8000/docs`
 
+### Lancer les tests
+
+    python -m pytest
+
+Attendu : `10 passed`. Les tests utilisent un faux index de 7 films : ils n'ont besoin ni des données ni de `models/`.
 
 ### GET /health
 
