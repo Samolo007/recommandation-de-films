@@ -160,7 +160,7 @@ Film sans voisins (200) :
 
 | Cas | Code | Réponse |
 |---|---|---|
-| `item_id` absent du catalogue | 404 | `{"detail": "Film introuvable"}` |
+| `item_id` absent du catalogue | 404 | `{"detail": "Film introuvable : cet identifiant n'existe pas dans le catalogue."}` |
 | Entrée invalide | 422 | `{"detail": [{"loc": [...], "msg": "...", "type": "..."}]}` |
 
 ## Exemple de test
