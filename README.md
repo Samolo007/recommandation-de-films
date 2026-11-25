@@ -79,3 +79,98 @@ licence MovieLens) : `{"neighbors": ..., "catalog": ...}`. Python 3.14.
     python -m pip install -r requirements.txt
     python src/evaluate.py
     python src/train_model.py
+
+
+## API
+### Lancer l'API
+
+Toutes les commandes se lancent depuis recommandation-de-films.
+
+Prérequis : les données dans `data/ml-100k/` (voir la section Données) et les dépendances installées :
+```
+ python -m pip install -r requirements.txt
+```
+
+1. Générer l'index des voisins (une seule fois) :
+   ```
+   python src/train_model.py
+   ```
+   Cette commande crée `models/knn_index.joblib`. Sans ce fichier, l'API refuse de démarrer.
+2. Lancer l'API :
+   ```
+   python -m uvicorn api:app --reload
+   ```
+3. Tester l'API dans le navigateur : `http://127.0.0.1:8000/docs`
+
+### Lancer les tests
+
+    python -m pytest
+
+Attendu : `10 passed`. Les tests utilisent un faux index de 7 films : ils n'ont besoin ni des données ni de `models/`.
+
+La CI GitHub Actions (`.github/workflows/tests.yml`) lance ces mêmes tests à chaque push et à chaque Pull Request, avec Python 3.14.
+
+### GET /health
+
+Vérifier si l'API fonctionne
+
+```json
+{"status": "ok"}
+```
+
+### POST /predict
+
+#### Entrée
+
+```json
+{"item_id": 50}
+```
+
+- `item_id` : entier strictement positif (identifiant MovieLens du film).
+- Refusés avec 422 : texte (`"50"`), nombre à virgule (`50.5`), valeur ≤ 0, champ manquant ou en trop.
+
+#### Réponse
+
+Film avec voisins (200) :
+
+```json
+{
+  "item_id": 50,
+  "title": "Star Wars (1977)",
+  "recommendations": [
+    {"item_id": 181, "title": "Return of the Jedi (1983)", "score": 0.791},
+    {"item_id": 172, "title": "Empire Strikes Back, The (1980)", "score": 0.717},
+    {"item_id": 174, "title": "Raiders of the Lost Ark (1981)", "score": 0.700},
+    {"item_id": 127, "title": "Godfather, The (1972)", "score": 0.631},
+    {"item_id": 98, "title": "Silence of the Lambs, The (1991)", "score": 0.619}
+  ],
+  "message": null
+}
+```
+
+Les 5 films sont triés du plus proche au moins proche, et le film choisi n'en fait jamais partie. `score` = similarité cosinus, entre 0 et 1 (arrondie dans cet exemple).
+
+Film sans voisins (200) :
+
+```json
+{
+  "item_id": 1407,
+  "title": "Specialist, The (1994)",
+  "recommendations": [],
+  "message": "Pas de recommandation : aucun spectateur n'a donné 4 ou 5 à ce film"
+}
+```
+
+200 parce que l'entrée est juste et le film existe dans le catalogue mais c'est juste que le film entrée ne possède pas de voisin : aucun spectateur n'a donné 4 ou 5 à ce film
+
+#### Erreurs
+
+| Cas | Code | Réponse |
+|---|---|---|
+| `item_id` absent du catalogue | 404 | `{"detail": "Film introuvable : cet identifiant n'existe pas dans le catalogue."}` |
+| Entrée invalide | 422 | `{"detail": [{"loc": [...], "msg": "...", "type": "..."}]}` |
+
+## Exemple de test
+
+- `{"item_id": 99999}` → 404 , `{"detail": "Film introuvable : cet identifiant n'existe pas dans le catalogue."}`
+- `{"item_id": 0}` → `422`, avec `loc` = `["body", "item_id"]`
