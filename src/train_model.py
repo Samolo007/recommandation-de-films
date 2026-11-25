@@ -3,7 +3,7 @@ from pathlib import Path
 import joblib
 import pandas as pd
 
-from knn import build_neighbors
+from knn import build_neighbors_svd
 from split import load_ratings, make_split
 
 ITEM_PATH = "data/ml-100k/u.item"
@@ -39,7 +39,7 @@ def main():
     train, _ = make_split(ratings)  # le même train que pour l'évaluation
 
     catalog = load_catalog()
-    neighbors = add_titles(build_neighbors(train), catalog)
+    neighbors = add_titles(build_neighbors_svd(train), catalog)
     artifact = {"neighbors": neighbors, "catalog": catalog}
 
     OUTPUT_PATH.parent.mkdir(exist_ok=True)
