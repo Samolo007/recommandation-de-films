@@ -108,6 +108,8 @@ Prérequis : les données dans `data/ml-100k/` (voir la section Données) et les
 
 Attendu : `10 passed`. Les tests utilisent un faux index de 7 films : ils n'ont besoin ni des données ni de `models/`.
 
+La CI GitHub Actions (`.github/workflows/tests.yml`) lance ces mêmes tests à chaque push et à chaque Pull Request, avec Python 3.14.
+
 ### GET /health
 
 Vérifier si l'API fonctionne
