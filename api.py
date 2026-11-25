@@ -54,3 +54,26 @@ async def invalid_input(request: Request, error: RequestValidationError):
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+NOT_FOUND = "Film introuvable : cet identifiant n'existe pas dans le catalogue."
+NO_NEIGHBORS = "Pas de recommandation : aucun spectateur n'a donné 4 ou 5 à ce film"
+
+
+@app.post("/predict", response_model=RecommendationResponse)
+def predict(movie: MovieRequest, request: Request):
+    index = request.app.state.index
+    catalog = index["catalog"]
+    neighbors = index["neighbors"]
+
+    if movie.item_id not in catalog:
+        raise HTTPException(status_code=404, detail=NOT_FOUND)
+
+    title = catalog[movie.item_id]
+    if movie.item_id not in neighbors:
+        return RecommendationResponse(
+            item_id=movie.item_id, title=title, recommendations=[], message=NO_NEIGHBORS
+        )
+
+    return RecommendationResponse(
+        item_id=movie.item_id, title=title, recommendations=neighbors[movie.item_id]
+    )
