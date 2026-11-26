@@ -23,6 +23,10 @@ class Recommendation(BaseModel):
     score: float                            
 
 
+class Movie(BaseModel):
+    item_id: int
+    title: str
+
 class RecommendationResponse(BaseModel):
     item_id: int
     title: str
@@ -77,3 +81,11 @@ def predict(movie: MovieRequest, request: Request):
     return RecommendationResponse(
         item_id=movie.item_id, title=title, recommendations=neighbors[movie.item_id]
     )
+
+@app.get("/movies", response_model=list[Movie])
+def movies(request: Request):
+    catalog = request.app.state.index["catalog"]
+    return [
+        Movie(item_id=item_id, title=title)
+        for item_id, title in sorted(catalog.items(), key=lambda pair: pair[1])
+    ]

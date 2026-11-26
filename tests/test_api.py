@@ -82,3 +82,11 @@ def test_predict_rejects_invalid_input(client, payload, field):
     response = client.post("/predict", json=payload)
     assert response.status_code == 422
     assert response.json()["detail"][0]["loc"] == ["body", field]
+
+
+def test_movies(client):
+    response = client.get("/movies")
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body) == 7
+    assert {"item_id": 7, "title": "Film sans voisins"} in body
