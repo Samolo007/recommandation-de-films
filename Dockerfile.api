@@ -1,0 +1,12 @@
+FROM python:3.14-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN python -m pip install -r requirements.txt
+
+COPY api.py ./
+COPY models/knn_index.joblib models/knn_index.joblib
+
+EXPOSE 8000
+CMD ["python", "-m", "uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
