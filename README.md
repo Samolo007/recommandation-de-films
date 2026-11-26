@@ -1,4 +1,7 @@
 # Recommandation de films (MovieLens 100K)
+
+Application qui propose 5 films proches d'un film choisi, à partir des notes MovieLens 100K : modèle (SVD + cosinus), API FastAPI, interface Streamlit, tests pytest, CI GitHub Actions et Docker.
+
 ## Données
 
 **Source :** MovieLens 100K, GroupLens Research (Université du Minnesota).
@@ -133,7 +136,7 @@ Prérequis : les données dans `data/ml-100k/` (voir la section Données) et les
 
     python -m pytest
 
-Attendu : `10 passed`. Les tests utilisent un faux index de 7 films : ils n'ont besoin ni des données ni de `models/`.
+Attendu : `11 passed`. Les tests utilisent un faux index de 7 films : ils n'ont besoin ni des données ni de `models/`.
 
 La CI GitHub Actions (`.github/workflows/tests.yml`) lance ces mêmes tests à chaque push et à chaque Pull Request, avec Python 3.14.
 
@@ -143,6 +146,14 @@ Vérifier si l'API fonctionne
 
 ```json
 {"status": "ok"}
+```
+
+### GET /movies
+
+Renvoie les 1 682 films du catalogue, triés par titre. L'interface Streamlit s'en sert pour remplir sa liste déroulante.
+
+```json
+[{"item_id": 1300, "title": "'Til There Was You (1997)"}, {"item_id": 1353, "title": "1-900 (1994)"}, ...]
 ```
 
 ### POST /predict
@@ -205,3 +216,29 @@ voisin : personne ne lui a donné 4 ou 5 dans les données d'entraînement (252 
 
 - `{"item_id": 99999}` → 404 , `{"detail": "Film introuvable : cet identifiant n'existe pas dans le catalogue."}`
 - `{"item_id": 0}` → `422`, avec `loc` = `["body", "item_id"]`
+
+## Interface Streamlit
+
+`ui.py` affiche une liste déroulante des films (« Titre (id) », car 18 titres sont en double) et une saisie libre de l'identifiant. Elle appelle l'API (`GET /movies`, puis `POST /predict`) et affiche les 5 films proches, le message si le film n'a pas de voisins, ou l'erreur renvoyée par l'API.
+
+En local, avec l'API déjà lancée (voir « Lancer l'API ») :
+
+```
+python -m streamlit run ui.py
+```
+
+Puis ouvrir `http://localhost:8501`. L'adresse de l'API se règle avec la variable d'environnement `API_URL` (par défaut `http://127.0.0.1:8000`).
+
+## Lancer avec Docker
+
+Prérequis : Docker Desktop démarré, les données dans `data/ml-100k/`, et l'index généré, car il est copié dans l'image de l'API :
+
+```
+python src/train_model.py
+docker compose up --build
+```
+
+- Interface : `http://localhost:8001`
+- API : `http://localhost:8000/docs`
+
+Deux images (`Dockerfile.api` et `Dockerfile.ui`, Python 3.14) ; dans Docker Compose, l'interface joint l'API par le nom du service (`API_URL=http://api:8000`). Pour arrêter : Ctrl+C, puis `docker compose down`. Si l'index change, relancer `python src/train_model.py`, puis `docker compose up --build`.
